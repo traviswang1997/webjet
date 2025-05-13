@@ -1,44 +1,59 @@
+using System.Net.Http.Headers;
+using MovieCompare.Backend.Extensions;
+using MovieCompare.Backend.Services;
+using Polly;
+using Polly.Extensions.Http;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllers();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddMemoryCache();
+builder.Services.AddCors(opt =>
+    opt.AddPolicy("AllowLocalfront", p =>
+        p.WithOrigins("http://localhost:5173")
+         .AllowAnyHeader()
+         .AllowAnyMethod()
+    )
+);
+
+//config
+var cinemaExternalApiConfig = builder.Configuration.GetSection("CinemaExternalApi");
+
+//polly
+var retryPolicy = HttpPolicyExtensions
+    .HandleTransientHttpError()
+    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromMilliseconds(200 * retryAttempt));
+
+builder.Services
+    .AddHttpClient("cinemaExternalApi", c =>
+    {
+        c.BaseAddress = new Uri(cinemaExternalApiConfig["BaseUrl"]);
+        c.DefaultRequestHeaders.Add("x-access-token", cinemaExternalApiConfig["ApiToken"]);
+    })
+    .AddPolicyHandler(retryPolicy);
+
+
+//DI
+builder.Services.AddScoped<IExternalMovieService, ExternalMovieService>();
+builder.Services.AddScoped<IMovieService, MovieService>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+app.UseCors("AllowLocalfront");
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
