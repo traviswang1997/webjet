@@ -1,54 +1,69 @@
-# React + TypeScript + Vite
+# MovieCompare – Cinema Price Comparison App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Tech Stack
 
-Currently, two official plugins are available:
+### Frontend:
+- React 18 + TypeScript
+- Zustand (global state management - todo if client side data need to be considered)
+- React Query (data fetching + caching)
+- TailwindCSS (UI styling)
+- Wouter (routing)
+- React Toastify (notifications - todo)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Backend:
+- .NET 8 Web API
+- RESTful endpoints
+- In-memory caching via IMemoryCache
+- NSwag-generated TypeScript client
+- XUnit + Moq (unit tests)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### System Design
+![image](https://github.com/user-attachments/assets/5ba9fd4b-6d05-446e-91f1-1d1d44f4fe38)
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Functional
+- Search by movie title
+- Filter by cinema
+- Paginated API
+- **Compare ticket prices**
+- Smart deduplication across providers
+- (Toasts for user feedback)
+- Graceful fallback if image fails to load
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Non-Functional
+- caching (5 min window)
+- Debounced interactions
+- Dockerized (frontend + backend)
+- Unit test coverage on API (90%)
+- Secure API keys (via environment variables)
+- ESLint + Prettier enforced formatting
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+---
+
+## TODO
+
+- [ ] Add integration tests for BFF API
+- [ ] Add provider health-check UI indicator
+- [ ] Support server-sent events or polling for real-time price updates
+- [ ] Database for persistency
+
+---
+
+## How to start
+
+### Backend
+cd backend
+dotnet restore
+dotnet build
+dotnet run
+
+### Frontend
+cd frontend
+npm install
+npm run dev
+
+### Docker
+docker-compose up --build
