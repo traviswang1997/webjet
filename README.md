@@ -55,15 +55,15 @@
 ## How to start
 
 ### Backend
-cd backend
-dotnet restore
-dotnet build
-dotnet run
+ cd backend \
+ dotnet restore \
+ dotnet build \
+ dotnet run
 
 ### Frontend
-cd frontend
-npm install
-npm run dev
+ cd frontend \
+ npm install \
+ npm run dev
 
 ### Docker
-docker-compose up --build
+- docker-compose up --build
